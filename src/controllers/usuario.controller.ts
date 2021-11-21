@@ -9,9 +9,10 @@ import {
 } from '@loopback/repository';
 import {
   del, get,
-  getModelSchemaRef, param, patch, post, put, requestBody,
+  getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
+import {Llaves} from '../config/Llaves';
 import {Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
 import {AutenticacionService} from '../services';
@@ -24,6 +25,33 @@ export class UsuarioController {
     @service(AutenticacionService)
     public servicioAutenticacion: AutenticacionService,
   ) { }
+
+  @post('/identificarUsuario', {
+    responses: {
+      '200': {
+        description: "identificacion de usuarios"
+      }
+    }
+  })
+  async identificarUsuario(
+    @requestBody() credenciales: Usuario
+  ) {
+    let u = await this.servicioAutenticacion.IdentificarUsuario(credenciales.user, credenciales.clave);
+    if (u) {
+      let token = this.servicioAutenticacion.GenerarTokenJWT(u);
+      return {
+        datos: {
+          nombre: u.personaId.nombre,
+          correo: u.personaId.correoElectronico,
+          id: u.id
+        },
+        tk: token
+      }
+    } else {
+      throw new HttpErrors[401]("los datos suministrados no son validos");
+    }
+  }
+
 
   @post('/usuarios')
   @response(200, {
@@ -53,7 +81,7 @@ export class UsuarioController {
     let destino = usuario.personaId.correoElectronico;
     let asunto = 'Registro app Equipos Tecnologicos'
     let mensaje = `Hola ${usuario.personaId.nombre}, su nombre de usuario es: ${usuario.user} y su contraseña asignada es: ${clave}`;
-    fetch(`http://127.0.0.1:5000/email?correo_destino=${destino}&asunto=${asunto}&mensaje=${mensaje}`)
+    fetch(`${Llaves.urlServicioNotificaciones}/email?correo_destino=${destino}&asunto=${asunto}&mensaje=${mensaje}`)
       .then((data: any) => {
         console.log(data);
       })
