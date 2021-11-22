@@ -8,3 +8,8 @@ export * from './usuario.controller';
 export * from './rol.controller';
 export * from './menu.controller';
 export * from './menurol.controller';
+export * from './pedido-usuario.controller';
+export * from './usuario-pedido.controller';
+export * from './pedido-producto.controller';
+export * from './producto.controller';
+export * from './pedido.controller';
