@@ -14,14 +14,15 @@ import {
 } from '@loopback/rest';
 import {Producto} from '../models';
 import {ProductoRepository} from '../repositories';
-
+@authenticate('admin')
+@authenticate('asesor')
 export class ProductoController {
   constructor(
     @repository(ProductoRepository)
     public productoRepository: ProductoRepository,
   ) { }
 
-  @authenticate('admin')
+
 
   @post('/productos')
   @response(200, {
@@ -54,7 +55,7 @@ export class ProductoController {
   ): Promise<Count> {
     return this.productoRepository.count(where);
   }
-
+  @authenticate('cliente')
   @get('/productos')
   @response(200, {
     description: 'Array of Producto model instances',
